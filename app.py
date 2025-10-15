@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from data_manager import DataManager
 from models import db, Movie
 import os
@@ -26,17 +26,18 @@ def list_users():
 """
 
 @app.route('/')
-def home():
-    return "Welcome to the Movie Web App!"
+def index():
+    users = data_manager.get_users()
+    return render_template('index.html', users=users)
 
 
 @app.route('/users', methods=['POST'])
-def add_user():
+def create_user():
     pass
 
 
 @app.route('/users/<int:user_id>/movies', methods=['GET'])
-def show_favourite_movies(user_id):
+def get_movies(user_id):
     pass
 
 
