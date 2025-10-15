@@ -8,11 +8,32 @@
 
 {% extends 'base.html' %}
 {% block content %}
-<h1>Users</h1>
+<h2>Users</h2>
 <ul class="user-list">
     {% for user in users %}
     <li class="user-entry">
-        <a href="{{ url_for('get_movies', user_id=user.id) }}" class="btn">{{ user.name }}</a>
+        {{ user.name }}
+
+        <form method="get"
+              action="{{ url_for('get_movies', user_id=user.id) }}"
+              style="display:inline">
+            <button type="submit" class="btn delete">View Movies</button>
+        </form>
+
+        <form method="post"
+              action="{{ url_for('update_username', user_id=user.id) }}"
+              style="display:inline">
+            <input type="text" name="name" placeholder="New name">
+            <button type="submit" class="btn">Rename User</button>
+        </form>
+
+        <form method="post"
+              action="{{ url_for('delete_user', user_id=user.id) }}"
+              style="display:inline"
+              onsubmit="return confirm('Are you sure you want to delete {{ user.name }} and all the movies?');">
+            <button type="submit" class="btn delete">Delete User</button>
+        </form>
+
     </li>
     {% endfor %}
 </ul>

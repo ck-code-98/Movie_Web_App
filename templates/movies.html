@@ -5,9 +5,10 @@
     <title>Title</title>
 </head>
 <body>
-<h2>Movies for user {{ user_id }}</h2>
+<a href="/">Home</a>
+<h2>{{ user.name }}'s Movie Library</h2>
 
-<form method="post" action="{{ url_for('add_movie', user_id=user_id) }}">
+<form method="post" action="{{ url_for('add_movie', user_id=user.id) }}">
     <input type="text" name="title" placeholder="Movie title">
     <button type="submit">Add Movie</button>
 </form>
@@ -27,14 +28,14 @@
             {% endif %}
 
             <form method="post"
-                  action="{{ url_for('update_movie_title', user_id=user_id, movie_id=movie_id) }}">
+                  action="{{ url_for('update_movie_title', user_id=user.id, movie_id=movie.id) }}">
                 <label for="title-{{ movie.id }}">New title:</label>
                 <input id="title-{{ movie.id }}" type="text" name="title" value="{{ movie.title }}">
                 <button type="submit">Update</button>
             </form>
 
             <form method="post"
-                  action="{{ url_for('delete_movie', user_id=user_id, movie_id=movie_id) }}"
+                  action="{{ url_for('delete_movie', user_id=user.id, movie_id=movie.id) }}"
                   onsubmit="return confirm('Are you sure you want to delete this movie?');">
                 <button type="submit">Delete</button>
             </form>
@@ -42,6 +43,7 @@
     {% endfor %}
 {% else %}
     <p>No movies found.</p>
+    <a href="{{ url_for('index') }}" class="btn">Back to Homepage</a>
 {% endif %}
 </body>
 </html>

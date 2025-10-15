@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>500 Internal Error</title>
+</head>
+<body>
+    {%extends "base.html" %}
+  {% block content %}
+    <div class="error-container">
+      <h2>500 - Internal Server Error</h2>
+      <p>Something unexpected happened on the server side.
+        Don't worry - It's not your fault. Please try again later.</p>
+      <a href="{{ url_for('index') }}" class="btn">Back to Homepage</a>
+    </div>
+  {% endblock %}
+</body>
+</html>

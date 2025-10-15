@@ -24,23 +24,40 @@ class DataManager():
     def add_movie(self, movie):
         db.session.add(movie)
         db.session.commit()
+        return movie
 
 
     def update_movie(self, movie_id, new_title):
         movie_to_update = db.session.query(Movie).get(movie_id)
-        if movie_to_update:
-            movie_to_update.title = new_title
-            db.session.commit()
-            return movie_to_update
-        else:
+        if not movie_to_update:
             return None
+        movie_to_update.title = new_title
+        db.session.commit()
+        return movie_to_update
 
 
     def delete_movie(self, movie_id):
         movie_to_delete = db.session.query(Movie).get(movie_id)
-        if movie_to_delete:
-            db.session.delete(movie_to_delete)
-            db.session.commit()
-            return movie_to_delete
-        else:
+        if not movie_to_delete:
             return None
+        db.session.delete(movie_to_delete)
+        db.session.commit()
+        return movie_to_delete
+
+
+    def delete_user(self, user_id):
+        user_to_delete = db.session.query(User).get(user_id)
+        if not user_to_delete:
+            return None
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        return user_to_delete
+
+
+    def update_username(self, user_id, new_name):
+        user_to_update = db.session.query(User).get(user_id)
+        if not user_to_update:
+            return None
+        user_to_update.name = new_name
+        db.session.commit()
+        return user_to_update

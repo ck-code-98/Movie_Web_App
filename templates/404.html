@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>404 Bad Request</title>
+</head>
+<body>
+  {%extends "base.html" %}
+  {% block content %}
+    <div class="error-container">
+      <h2>404 - Page not found</h2>
+      <p>Oops! The page you are looking for, does not exist. So you might imagine it or click here:</p>
+      <a href="{{ url_for('index') }}" class="btn">Back to Homepage</a>
+    </div>
+  {% endblock %}
+</body>
+</html>
