@@ -10,7 +10,7 @@
         <form method="get"
               action="{{ url_for('get_movies', user_id=user.id) }}"
               style="display:inline">
-            <button type="submit" class="btn delete">View Movies</button>
+            <button type="submit" class="btn view-movies">View Movies</button>
         </form>
 
         <button type="button" onclick="showRenameForm({{ user.id }}, 'user')">
