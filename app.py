@@ -40,7 +40,7 @@ def create_user():
         return redirect(url_for('index'))
 
     data_manager.create_user(name)
-    flash("User created successfully!")
+    flash("User created successfully!", "success")
     return redirect(url_for('index'))
 
 
@@ -50,7 +50,7 @@ def get_movies(user_id):
     if not user:
         flash("User not found!", "error")
         return redirect(url_for('index'))
-    movies = data_manager.get_movies(user_id)
+    movies = user.movies
     return render_template('movies.html', user=user, movies=movies)
 
 
@@ -61,13 +61,10 @@ def add_movie(user_id):
         flash("Title cannot be empty!", "error")
         return redirect(url_for("get_movies", user_id=user_id))
 
-    dup = db.session.query(Movie).filter(
-        Movie.user_id == user_id,
-        func.lower(Movie.title) == func.lower(title)
-    ).first()
-    if dup:
-        flash(f"The Movie '{dup.title}' is already in your movie list", "error")
-        return redirect(url_for("get_movies", user_id=user_id))
+    user = db.session.get(User, user_id)
+    if not user:
+        flash("User not found!", "error")
+        return redirect(url_for('index'))
 
     try:
         response = requests.get(OMDB_API_URL_BASE,
@@ -86,14 +83,6 @@ def add_movie(user_id):
         return redirect(url_for("get_movies", user_id=user_id))
 
     title = data.get('Title', title)
-    dup2=db.session.query(Movie).filter(
-        Movie.user_id == user_id,
-        func.lower(Movie.title) == func.lower(title)
-    ).first()
-    if dup2:
-        flash(f"The Movie '{title}' is already in your movie list", "error")
-        return redirect(url_for("get_movies", user_id=user_id))
-
     director = None if data.get('Director') in (None, 'N/A') else data['Director']
     poster_url = None if data.get('Poster') in (None, 'N/A') else data['Poster']
     year_str = data.get('Year')
@@ -102,11 +91,23 @@ def add_movie(user_id):
     except ValueError:
         year = None
 
-    movie = Movie(title=title, director=director, year=year,
-                  poster_url=poster_url, user_id=user_id)
+    movie = db.session.query(Movie).filter(
+        func.lower(Movie.title) == func.lower(title),
+        Movie.year == year
+    ).first()
 
-    data_manager.add_movie(movie)
-    flash("Movie added successfully!")
+    if not movie:
+        movie = Movie(title=title, director=director, year=year, poster_url=poster_url)
+        db.session.add(movie)
+        db.session.commit()
+
+    if movie in user.movies:
+        flash(f"The Movie '{title}' is already in your movie list!", "error")
+        return redirect(url_for("get_movies", user_id=user_id))
+
+    user.movies.append(movie)
+    db.session.commit()
+    flash("Movie added successfully!", "success")
     return redirect(url_for("get_movies", user_id=user_id))
 
 
@@ -114,24 +115,25 @@ def add_movie(user_id):
 def update_movie_title(user_id, movie_id):
     new_title = request.form.get("title", "").strip()
     if not new_title:
-        flash("Title cannot be empty!")
+        flash("Title cannot be empty!", "error")
         return redirect(url_for("get_movies", user_id=user_id))
 
     updated_movie = data_manager.update_movie(movie_id, new_title)
     if not updated_movie:
         flash("Movie not updated!", "error")
         return redirect(url_for("get_movies", user_id=user_id))
-    flash(f"Movie {updated_movie.title} updated successfully!")
+    flash(f"Movie {updated_movie.title} updated successfully!", "success")
     return redirect(url_for("get_movies", user_id=user_id))
 
 
 @app.route('/users/<int:user_id>/movies/<int:movie_id>/delete', methods=['POST'])
 def delete_movie(user_id, movie_id):
-    deleted_movie = data_manager.delete_movie(movie_id)
-    if not deleted_movie:
+    deleted = data_manager.delete_movie(user_id, movie_id)
+    if not deleted:
         flash("Movie not deleted!", "error")
-        return redirect(url_for("get_movies", user_id=user_id))
-    flash(f"Movie {deleted_movie.title} deleted successfully!")
+    else:
+        flash(f"Movie {deleted.title} deleted successfully!", "success")
+
     return redirect(url_for("get_movies", user_id=user_id))
 
 
@@ -146,21 +148,17 @@ def update_username(user_id):
     if not updated_user:
         flash("User not updated!", "error")
         return redirect(url_for("index"))
-    flash(f"Username updated successfully!")
+    flash(f"Username updated successfully!", "success")
     return redirect(url_for("index"))
 
 
 @app.route('/users/<int:user_id>/delete', methods=['POST'])
 def delete_user(user_id):
-    try:
-        deleted_user = data_manager.delete_user(user_id)
-    except SQLAlchemyError:
-        raise
-
+    deleted_user = data_manager.delete_user(user_id)
     if not deleted_user:
-        flash(f"User not deleted!")
+        flash(f"User not deleted!", "error")
     else:
-        flash(f"User {deleted_user.name} deleted successfully!")
+        flash(f"User {deleted_user.name} deleted successfully!", "success")
     return redirect(url_for('index'))
 
 

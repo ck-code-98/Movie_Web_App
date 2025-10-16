@@ -16,9 +16,8 @@ class DataManager():
 
 
     def get_movies(self, user_id):
-        list_of_movies = (db.session.query(Movie)
-                          .filter_by(user_id=user_id).all())
-        return list_of_movies
+        user = db.session.query(User).get(user_id)
+        return [] if not user else list(user.movies)
 
 
     def add_movie(self, movie):
@@ -36,11 +35,14 @@ class DataManager():
         return movie_to_update
 
 
-    def delete_movie(self, movie_id):
+    def delete_movie(self, user_id, movie_id):
         movie_to_delete = db.session.query(Movie).get(movie_id)
-        if not movie_to_delete:
+        user = db.session.query(User).get(user_id)
+        if not movie_to_delete or not user or movie_to_delete not in user.movies:
             return None
-        db.session.delete(movie_to_delete)
+        user.movies.remove(movie_to_delete)
+        if not movie_to_delete.users:
+            db.session.delete(movie_to_delete)
         db.session.commit()
         return movie_to_delete
 
@@ -49,7 +51,12 @@ class DataManager():
         user_to_delete = db.session.query(User).get(user_id)
         if not user_to_delete:
             return None
-        db.session.query(Movie).filter_by(user_id=user_id).delete(synchronize_session=False)
+
+        for movie in list(user_to_delete.movies):
+            user_to_delete.movies.remove(movie)
+            if not movie.users:
+                db.session.delete(movie)
+
         db.session.delete(user_to_delete)
         db.session.commit()
         return user_to_delete

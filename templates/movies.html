@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
 {% extends 'base.html' %}
 {% block content %}
 
-<a href="/">Home</a>
+<a href="{{ url_for('index') }}" class="btn">Back to Homepage</a>
 <h2>{{ user.name }}'s Movie Library</h2>
 
 <form method="post" action="{{ url_for('add_movie', user_id=user.id) }}">
@@ -53,9 +46,6 @@
     {% endfor %}
 {% else %}
     <p>No movies found.</p>
-    <a href="{{ url_for('index') }}" class="btn">Back to Homepage</a>
 {% endif %}
 
 {% endblock %}
-</body>
-</html>
