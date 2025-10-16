@@ -49,6 +49,7 @@ class DataManager():
         user_to_delete = db.session.query(User).get(user_id)
         if not user_to_delete:
             return None
+        db.session.query(Movie).filter_by(user_id=user_id).delete(synchronize_session=False)
         db.session.delete(user_to_delete)
         db.session.commit()
         return user_to_delete

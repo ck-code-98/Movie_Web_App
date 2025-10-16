@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import func
 from data_manager import DataManager
 from models import db, Movie, User
 from dotenv import load_dotenv
@@ -47,7 +48,7 @@ def create_user():
 def get_movies(user_id):
     user = db.session.get(User, user_id)
     if not user:
-        flash("User not found!" "error")
+        flash("User not found!", "error")
         return redirect(url_for('index'))
     movies = data_manager.get_movies(user_id)
     return render_template('movies.html', user=user, movies=movies)
@@ -55,9 +56,17 @@ def get_movies(user_id):
 
 @app.route('/users/<int:user_id>/movies', methods=['POST'])
 def add_movie(user_id):
-    title = request.form.get("title", "").strip()
+    title = " ".join(request.form.get("title", "").split())
     if not title:
-        flash("Title cannot be empty!")
+        flash("Title cannot be empty!", "error")
+        return redirect(url_for("get_movies", user_id=user_id))
+
+    dup = db.session.query(Movie).filter(
+        Movie.user_id == user_id,
+        func.lower(Movie.title) == func.lower(title)
+    ).first()
+    if dup:
+        flash(f"The Movie '{dup.title}' is already in your movie list", "error")
         return redirect(url_for("get_movies", user_id=user_id))
 
     try:
@@ -77,6 +86,14 @@ def add_movie(user_id):
         return redirect(url_for("get_movies", user_id=user_id))
 
     title = data.get('Title', title)
+    dup2=db.session.query(Movie).filter(
+        Movie.user_id == user_id,
+        func.lower(Movie.title) == func.lower(title)
+    ).first()
+    if dup2:
+        flash(f"The Movie '{title}' is already in your movie list", "error")
+        return redirect(url_for("get_movies", user_id=user_id))
+
     director = None if data.get('Director') in (None, 'N/A') else data['Director']
     poster_url = None if data.get('Poster') in (None, 'N/A') else data['Poster']
     year_str = data.get('Year')
@@ -143,7 +160,7 @@ def delete_user(user_id):
     if not deleted_user:
         flash(f"User not deleted!")
     else:
-        flash(f"User {deleted_user} deleted successfully!")
+        flash(f"User {deleted_user.name} deleted successfully!")
     return redirect(url_for('index'))
 
 
