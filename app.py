@@ -135,11 +135,15 @@ def update_username(user_id):
 
 @app.route('/users/<int:user_id>/delete', methods=['POST'])
 def delete_user(user_id):
-    deleted_user = data_manager.delete_user(user_id)
+    try:
+        deleted_user = data_manager.delete_user(user_id)
+    except SQLAlchemyError:
+        raise
+
     if not deleted_user:
         flash(f"User not deleted!")
-        return redirect(url_for('index'))
-    flash(f"User {deleted_user} deleted successfully!")
+    else:
+        flash(f"User {deleted_user} deleted successfully!")
     return redirect(url_for('index'))
 
 
@@ -157,7 +161,7 @@ def internal_server_error(e):
 def handle_db_error(e):
     db.session.rollback()
     flash("A database error occurred!", "error")
-    return redirect(url_for('index'))
+    return render_template('500.html'), 500
 
 
 if __name__ == "__main__":

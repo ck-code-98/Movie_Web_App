@@ -5,9 +5,9 @@
     <title>Title</title>
 </head>
 <body>
-
 {% extends 'base.html' %}
 {% block content %}
+
 <h2>Users</h2>
 <ul class="user-list">
     {% for user in users %}
@@ -20,11 +20,18 @@
             <button type="submit" class="btn delete">View Movies</button>
         </form>
 
-        <form method="post"
+        <button type="button" onclick="showRenameForm({{ user.id }}, 'user')">
+            Rename User
+        </button>
+
+        <form id="rename-form-user-{{ user.id }}" method="post"
               action="{{ url_for('update_username', user_id=user.id) }}"
-              style="display:inline">
+              style="display:none">
             <input type="text" name="name" placeholder="New name">
-            <button type="submit" class="btn">Rename User</button>
+            <button type="submit">Confirm</button>
+            <button type="button" onclick="hideRenameForm({{ user.id }}, 'user')">
+                Cancel
+            </button>
         </form>
 
         <form method="post"
@@ -43,7 +50,7 @@
     <input type="text" id="name" name="name" required>
     <button type="submit">Create User</button>
 </form>
-{% endblock %}
 
+{% endblock %}
 </body>
 </html>

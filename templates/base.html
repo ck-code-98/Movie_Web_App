@@ -10,5 +10,14 @@
   <main class="container">
     {% block content %}{% endblock %}
   </main>
+
+<script>
+    function showRenameForm(id, type) {
+    document.getElementById(`rename-form-${type}-${id}`).style.display = 'inline';}
+
+    function hideRenameForm(id, type) {
+    document.getElementById(`rename-form-${type}-${id}`).style.display = 'none';}
+</script>
+
 </body>
 </html>

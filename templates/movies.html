@@ -5,6 +5,9 @@
     <title>Title</title>
 </head>
 <body>
+{% extends 'base.html' %}
+{% block content %}
+
 <a href="/">Home</a>
 <h2>{{ user.name }}'s Movie Library</h2>
 
@@ -27,11 +30,18 @@
                      alt="No poster available for this movie">
             {% endif %}
 
-            <form method="post"
-                  action="{{ url_for('update_movie_title', user_id=user.id, movie_id=movie.id) }}">
-                <label for="title-{{ movie.id }}">New title:</label>
-                <input id="title-{{ movie.id }}" type="text" name="title" value="{{ movie.title }}">
-                <button type="submit">Update</button>
+            <button type="button" onclick="showRenameForm({{ movie.id }}, 'movie')">
+            Rename Title
+            </button>
+
+            <form id="rename-form-movie-{{ movie.id }}" method="post"
+                action="{{ url_for('update_movie_title', user_id=user.id, movie_id=movie.id) }}"
+                style="display:none;">
+                <input type="text" name="title" value="{{ movie.title }}">
+                <button type="submit">Confirm</button>
+                <button type="button" onclick="hideRenameForm({{ movie.id }}, 'movie')">
+                    Cancel
+                </button>
             </form>
 
             <form method="post"
@@ -45,5 +55,7 @@
     <p>No movies found.</p>
     <a href="{{ url_for('index') }}" class="btn">Back to Homepage</a>
 {% endif %}
+
+{% endblock %}
 </body>
 </html>
